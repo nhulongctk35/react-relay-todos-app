@@ -1,33 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Suspense, useEffect, useState } from 'react'
 import './App.css'
+import { graphql } from 'relay-runtime'
+import { PreloadedQuery, useFragment, usePreloadedQuery, useQueryLoader } from 'react-relay'
+import { AppQuery as AppQueryType } from './__generated__/AppQuery.graphql'
+import { AppTodoFragment$key } from './__generated__/AppTodoFragment.graphql'
+import { AppTodoListFragment$key } from './__generated__/AppTodoListFragment.graphql'
+import TodoItem from './components/TodoItem'
+import TodoList from './components/TodoList'
+import "todomvc-app-css/index.css";
+
+
+
+const AppQuery = graphql`
+  query AppQuery {
+    user(id: "me")
+    @required(action: THROW) {
+      id
+      userId
+      ...TodoList_user
+    }
+  }
+`
+
+function TodoApp({appQueryRef}: {appQueryRef: PreloadedQuery<AppQueryType>}) {
+  const { user} = usePreloadedQuery(AppQuery, appQueryRef)
+
+  return (
+    <div className='todoapp'>
+      <TodoList userRef={user} />
+    </div>
+  )
+}
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [appQueryReference, loadQuery ] = useQueryLoader<AppQueryType>(AppQuery)
+
+  useEffect(() => {
+    loadQuery({})
+  }, [loadQuery])
+
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+     {appQueryReference !=null && <TodoApp appQueryRef={appQueryReference} /> }
     </>
   )
 }
