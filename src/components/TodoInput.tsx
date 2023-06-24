@@ -19,6 +19,7 @@ export default function TodoInput({onEnter}: TodoInputProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode === 13 && text.length) {
       onEnter(text);
+      setText('');
     }
   };
 

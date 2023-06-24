@@ -3,6 +3,7 @@ import {graphql} from 'relay-runtime';
 import {TodoList_user$key} from './__generated__/TodoList_user.graphql';
 import TodoItem from './TodoItem';
 import TodoInput from './TodoInput';
+import useTodoMutation from '../mutations/AddTodoMutation';
 
 const TodoListFragment = graphql`
   fragment TodoList_user on User {
@@ -19,45 +20,19 @@ const TodoListFragment = graphql`
   }
 `;
 
-const TodoListAddTodoMutation = graphql`
-  mutation TodoListAddTodoMutation(
-    $connections: [ID!]!
-    $input: AddTodoInput!
-  ) {
-    addTodo(input: $input) {
-      todoEdge @appendEdge(connections: $connections) {
-        node {
-          id
-          ...TodoItemFragment
-        }
-      }
-      user {
-        id
-        totalCount
-      }
-    }
-  }
-`;
-
 export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
   const data = useFragment(TodoListFragment, userRef);
-  console.log('@data', data);
 
-  const [addTodo] = useMutation(TodoListAddTodoMutation);
+  const [addTodo] = useTodoMutation();
 
   const submitTodo = (text: string) => {
-    console.log('@submitTodo', data?.todos?.__id);
-
-    addTodo({
-      variables: {
-        input: {
-          text,
-          userId: data.userId,
-        },
-        connections: [data?.todos?.__id],
+    addTodo(
+      {
+        text,
+        userId: data.userId,
       },
-    });
-    // console.log(text);
+      data.todos?.__id,
+    );
   };
 
   return (
