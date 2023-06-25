@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d3f113c02cd319a0f6efa8cf7d6cb2c1>>
+ * @generated SignedSource<<2106dbd2791d5b784083425b984a7762>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,7 @@
 import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type TodoList_user$data = {
+  readonly completedCount: number;
   readonly todos: {
     readonly __id: string;
     readonly edges: ReadonlyArray<{
@@ -20,7 +21,9 @@ export type TodoList_user$data = {
       } | null;
     } | null> | null;
   } | null;
+  readonly totalCount: number;
   readonly userId: string;
+  readonly " $fragmentSpreads": FragmentRefs<"TodoFooter_user">;
   readonly " $fragmentType": "TodoList_user";
 };
 export type TodoList_user$key = {
@@ -145,14 +148,33 @@ const node: ReaderFragment = {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
+      "name": "totalCount",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "completedCount",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
       "name": "userId",
       "storageKey": null
+    },
+    {
+      "args": null,
+      "kind": "FragmentSpread",
+      "name": "TodoFooter_user"
     }
   ],
   "type": "User",
   "abstractKey": null
 };
 
-(node as any).hash = "fe280538800d14228664b460e2d7e90c";
+(node as any).hash = "14af71bec619360ff69f52d261c42d40";
 
 export default node;

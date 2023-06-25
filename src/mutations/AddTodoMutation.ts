@@ -19,11 +19,11 @@ const mutation = graphql`
   }
 `;
 
-export default function useTodoMutation() {
+export default function useAddTodoMutation(connectionId: string) {
   const [commit] = useMutation(mutation);
 
   const addTodo = useCallback(
-    (input: {text: string; userId: string}, connectionId?: string) => {
+    (input: {text: string; userId: string}) => {
       commit({
         variables: {
           connections: [connectionId],
@@ -31,7 +31,7 @@ export default function useTodoMutation() {
         },
       });
     },
-    [commit],
+    [commit, connectionId],
   );
 
   return [addTodo];

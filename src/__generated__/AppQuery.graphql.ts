@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<502a58f6bf98b108002cf6228c3d44f5>>
+ * @generated SignedSource<<0d71ebf422e40cdb3872d600332c1552>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -49,7 +49,7 @@ v3 = [
   {
     "kind": "Literal",
     "name": "first",
-    "value": 10
+    "value": 2147483647
   }
 ];
 return {
@@ -199,7 +199,7 @@ return {
                 ]
               }
             ],
-            "storageKey": "todos(first:10)"
+            "storageKey": "todos(first:2147483647)"
           },
           {
             "alias": null,
@@ -209,6 +209,20 @@ return {
             "key": "TodoList_todos",
             "kind": "LinkedHandle",
             "name": "todos"
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "totalCount",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "completedCount",
+            "storageKey": null
           }
         ],
         "storageKey": "user(id:\"me\")"
@@ -216,12 +230,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "c55dae6d67f286979b9e66fc86f4a843",
+    "cacheID": "acf48bf728e6509462cc7dd8ed41964d",
     "id": null,
     "metadata": {},
     "name": "AppQuery",
     "operationKind": "query",
-    "text": "query AppQuery {\n  user(id: \"me\") {\n    id\n    userId\n    ...TodoList_user\n  }\n}\n\nfragment TodoItemFragment on Todo {\n  id\n  text\n  complete\n}\n\nfragment TodoList_user on User {\n  todos(first: 10) {\n    edges {\n      node {\n        id\n        ...TodoItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  userId\n}\n"
+    "text": "query AppQuery {\n  user(id: \"me\") {\n    id\n    userId\n    ...TodoList_user\n  }\n}\n\nfragment TodoFooter_user on User {\n  userId\n  totalCount\n  completedCount\n}\n\nfragment TodoItemFragment on Todo {\n  id\n  text\n  complete\n}\n\nfragment TodoList_user on User {\n  todos(first: 2147483647) {\n    edges {\n      node {\n        id\n        ...TodoItemFragment\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n  totalCount\n  completedCount\n  userId\n  ...TodoFooter_user\n}\n"
   }
 };
 })();

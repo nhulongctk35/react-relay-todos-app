@@ -1,13 +1,18 @@
-import {useFragment, useMutation, useRefetchableFragment} from 'react-relay';
+import {useFragment} from 'react-relay';
 import {graphql} from 'relay-runtime';
 import {TodoList_user$key} from './__generated__/TodoList_user.graphql';
 import TodoItem from './TodoItem';
 import TodoInput from './TodoInput';
-import useTodoMutation from '../mutations/AddTodoMutation';
+import useAddTodoMutation from '../mutations/AddTodoMutation';
+import TodoFooter from './TodoFooter';
+import useChangeTodoStatus from '../mutations/ChangeTodoStatusMutation';
+import useRemoveTodoMutation from '../mutations/RemoveTodoMutation';
+import {useState} from 'react';
+import useMarkAllTodosMutation from '../mutations/MarkAllTodosMutation';
 
 const TodoListFragment = graphql`
   fragment TodoList_user on User {
-    todos(first: 10) @connection(key: "TodoList_todos") {
+    todos(first: 2147483647) @connection(key: "TodoList_todos") {
       __id
       edges {
         node {
@@ -16,23 +21,50 @@ const TodoListFragment = graphql`
         }
       }
     }
+    totalCount
+    completedCount
     userId
+    ...TodoFooter_user
   }
 `;
 
 export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
   const data = useFragment(TodoListFragment, userRef);
 
-  const [addTodo] = useTodoMutation();
+  if (data.todos?.__id == null) {
+    throw new Error('Expected todos to have __id');
+  }
+
+  const [addTodo] = useAddTodoMutation(data.todos.__id);
+  const [commitTodoStatus] = useChangeTodoStatus();
 
   const submitTodo = (text: string) => {
-    addTodo(
-      {
-        text,
-        userId: data.userId,
-      },
-      data.todos?.__id,
-    );
+    addTodo({
+      text,
+      userId: data.userId,
+    });
+  };
+
+  const changeTodoStatus = (todoData: {complete: boolean; id: string}) => {
+    commitTodoStatus({...todoData, userId: data.userId});
+  };
+
+  const [removeTodo] = useRemoveTodoMutation(data.todos.__id);
+
+  const handleRemoveTodo = (id: string) => {
+    removeTodo({
+      id,
+      userId: data.userId,
+    });
+  };
+
+  const [allSelected, setAllSelected] = useState(false);
+
+  const [markTodosStatus] = useMarkAllTodosMutation();
+
+  const onToggleAll = () => {
+    markTodosStatus({complete: !allSelected, userId: data.userId});
+    setAllSelected(!allSelected);
   };
 
   return (
@@ -43,48 +75,29 @@ export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
       </header>
 
       <section className="main">
-        {/* <input
+        <input
           id="toggle-all"
           type="checkbox"
           className="toggle-all"
-            checked={allSelected}
-            onChange={onToggleAll}
+          checked={allSelected}
+          onChange={onToggleAll}
         />
-        <label htmlFor="toggle-all" /> */}
+        <label htmlFor="toggle-all" />
         <ul className="todo-list">
-          {data?.todos?.edges?.map(({node}) =>
-            node ? <TodoItem key={node.id} todoRef={node} /> : null,
+          {data?.todos?.edges?.map((edge) =>
+            edge?.node ? (
+              <TodoItem
+                onToggle={changeTodoStatus}
+                onDestroy={handleRemoveTodo}
+                key={edge.node.id}
+                todoRef={edge.node}
+              />
+            ) : null,
           )}
         </ul>
       </section>
 
-      <footer className="footer">
-        <span className="todo-count">
-          {/* <strong>{left}</strong> items left */}
-        </span>
-        {/* <ul className="filters">
-          <li>
-            <NavLink exact={true} to="/" activeClassName="selected">
-              All
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/active" activeClassName="selected">
-              Active
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/completed" activeClassName="selected">
-              Completed
-            </NavLink>
-          </li>
-        </ul>
-        {anyDone && (
-          <button className="clear-completed" onClick={onClearCompleted}>
-            Clear completed
-          </button>
-        )} */}
-      </footer>
+      <TodoFooter todoConnectionId={data.todos.__id} userRef={data} />
     </>
   );
 }

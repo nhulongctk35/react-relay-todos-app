@@ -6,8 +6,8 @@ import {TodoItemFragment$key} from './__generated__/TodoItemFragment.graphql';
 type TodoItemProps = {
   todoRef: TodoItemFragment$key;
   editing?: boolean;
-  onToggle?: () => void;
-  onDestroy?: () => void;
+  onToggle: (data: {complete: boolean; id: string}) => void;
+  onDestroy: (todoId: string) => void;
   handleEdit?: () => void;
 };
 
@@ -34,10 +34,12 @@ export default function TodoItem(props: TodoItemProps) {
           type="checkbox"
           checked={data.complete}
           readOnly
-          //   onChange={props.onToggle}
+          onChange={() =>
+            props.onToggle({complete: !data.complete, id: data.id})
+          }
         />
         <label onDoubleClick={props.handleEdit}>{data.text}</label>
-        <button className="destroy" onClick={props.onDestroy} />
+        <button className="destroy" onClick={() => props.onDestroy(data.id)} />
       </div>
       {/* <input
                 ref="editField"
