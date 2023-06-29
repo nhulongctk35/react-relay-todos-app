@@ -7,8 +7,9 @@ import useAddTodoMutation from '../mutations/AddTodoMutation';
 import TodoFooter from './TodoFooter';
 import useChangeTodoStatus from '../mutations/ChangeTodoStatusMutation';
 import useRemoveTodoMutation from '../mutations/RemoveTodoMutation';
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import useMarkAllTodosMutation from '../mutations/MarkAllTodosMutation';
+import React from 'react';
 
 const TodoListFragment = graphql`
   fragment TodoList_user on User {
@@ -28,8 +29,13 @@ const TodoListFragment = graphql`
   }
 `;
 
-export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
+interface TodoListProps extends React.ComponentPropsWithoutRef<'section'> {
+  userRef: TodoList_user$key;
+}
+
+export default function TodoList({userRef}: TodoListProps) {
   const data = useFragment(TodoListFragment, userRef);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   if (data.todos?.__id == null) {
     throw new Error('Expected todos to have __id');
@@ -62,16 +68,28 @@ export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
 
   const [markTodosStatus] = useMarkAllTodosMutation();
 
-  const onToggleAll = () => {
+  const onToggleAll = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+
     markTodosStatus({complete: !allSelected, userId: data.userId});
+
     setAllSelected(!allSelected);
   };
+
+  React.useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   return (
     <>
       <header className="header">
         <h1>todos</h1>
-        <TodoInput onEnter={submitTodo} />
+        <TodoInput
+          ref={inputRef}
+          placeholder="What needs to be done? from parent"
+          className="todo-input"
+          onEnter={submitTodo}
+        />
       </header>
 
       <section className="main">
@@ -87,6 +105,7 @@ export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
           {data?.todos?.edges?.map((edge) =>
             edge?.node ? (
               <TodoItem
+                className="todo-item"
                 onToggle={changeTodoStatus}
                 onDestroy={handleRemoveTodo}
                 key={edge.node.id}
@@ -97,7 +116,11 @@ export default function TodoList({userRef}: {userRef: TodoList_user$key}) {
         </ul>
       </section>
 
-      <TodoFooter todoConnectionId={data.todos.__id} userRef={data} />
+      <TodoFooter
+        className="bg-red"
+        todoConnectionId={data.todos.__id}
+        userRef={data}
+      />
     </>
   );
 }

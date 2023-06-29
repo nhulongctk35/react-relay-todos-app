@@ -3,13 +3,13 @@ import {useFragment} from 'react-relay';
 import {graphql} from 'relay-runtime';
 import {TodoItemFragment$key} from './__generated__/TodoItemFragment.graphql';
 
-type TodoItemProps = {
+interface TodoItemProps extends React.ComponentPropsWithoutRef<'li'> {
   todoRef: TodoItemFragment$key;
   editing?: boolean;
   onToggle: (data: {complete: boolean; id: string}) => void;
   onDestroy: (todoId: string) => void;
   handleEdit?: () => void;
-};
+}
 
 const TodoItemFragment = graphql`
   fragment TodoItemFragment on Todo {
@@ -19,14 +19,23 @@ const TodoItemFragment = graphql`
   }
 `;
 
-export default function TodoItem(props: TodoItemProps) {
-  const data = useFragment(TodoItemFragment, props.todoRef);
+export default function TodoItem({
+  todoRef,
+  editing,
+  onToggle,
+  onDestroy,
+  handleEdit,
+  className,
+  ...props
+}: TodoItemProps) {
+  const data = useFragment(TodoItemFragment, todoRef);
 
   return (
     <li
-      className={classNames({
+      {...props}
+      className={classNames(className, {
         completed: data.complete,
-        editing: props.editing,
+        editing: editing,
       })}>
       <div className="view">
         <input
@@ -34,21 +43,11 @@ export default function TodoItem(props: TodoItemProps) {
           type="checkbox"
           checked={data.complete}
           readOnly
-          onChange={() =>
-            props.onToggle({complete: !data.complete, id: data.id})
-          }
+          onChange={() => onToggle({complete: !data.complete, id: data.id})}
         />
-        <label onDoubleClick={props.handleEdit}>{data.text}</label>
-        <button className="destroy" onClick={() => props.onDestroy(data.id)} />
+        <label onDoubleClick={handleEdit}>{data.text}</label>
+        <button className="destroy" onClick={() => onDestroy(data.id)} />
       </div>
-      {/* <input
-                ref="editField"
-                className="edit"
-                value={this.state.editText}
-                onBlur={this.handleSubmit}
-                onChange={this.handleChange}
-                onKeyDown={this.handleKeyDown}
-            /> */}
     </li>
   );
 }

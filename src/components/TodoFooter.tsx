@@ -2,6 +2,7 @@ import {useFragment} from 'react-relay';
 import {graphql} from 'relay-runtime';
 import {TodoFooter_user$key} from './__generated__/TodoFooter_user.graphql';
 import useRemoveCompletedTodosMutation from '../mutations/RemoveCompletedTodosMutation';
+import classNames from 'classnames';
 
 const todoFooterFragment = graphql`
   fragment TodoFooter_user on User {
@@ -10,14 +11,16 @@ const todoFooterFragment = graphql`
     completedCount
   }
 `;
-type TodoFooterProps = {
+interface TodoFooterProps extends React.ComponentPropsWithoutRef<'footer'> {
   userRef: TodoFooter_user$key;
   todoConnectionId: string;
-};
+}
 
 export default function TodoFooter({
   userRef,
   todoConnectionId,
+  className,
+  ...props
 }: TodoFooterProps) {
   const data = useFragment(todoFooterFragment, userRef);
   const left = data.totalCount - data.completedCount;
@@ -32,27 +35,10 @@ export default function TodoFooter({
   };
 
   return (
-    <footer className="footer">
+    <footer className={classNames(className, 'footer')} {...props}>
       <span className="todo-count">
         <strong>{left}</strong> items left
       </span>
-      {/* <ul className="filters">
-          <li>
-            <NavLink exact={true} to="/" activeClassName="selected">
-              All
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/active" activeClassName="selected">
-              Active
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/completed" activeClassName="selected">
-              Completed
-            </NavLink>
-          </li>
-        </ul> */}
       {anyDone && (
         <button className="clear-completed" onClick={clearComplete}>
           Clear completed
